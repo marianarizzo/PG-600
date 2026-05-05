@@ -1,1649 +1,740 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
-    
-            <meta name="viewport" content="width=device-width,
-                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <style>
-                #map_722645d1d2ea9a6052152f44e6a8cf25 {
-                    position: relative;
-                    width: 100.0%;
-                    height: 100.0%;
-                    left: 0.0%;
-                    top: 0.0%;
-                }
-                .leaflet-container { font-size: 1rem; }
-            </style>
+<meta charset="UTF-8">
+<title>Análise Wareclouds</title>
 
-            <style>html, body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            </style>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+}
 
-            <style>#map {
-                position:absolute;
-                top:0;
-                bottom:0;
-                right:0;
-                left:0;
-                }
-            </style>
+.header {
+    background: #111827;
+    color: white;
+    padding: 18px 28px;
+}
 
-            <script>
-                L_NO_TOUCH = false;
-                L_DISABLE_3D = false;
-            </script>
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+}
 
-        
+.header p {
+    margin: 6px 0 0 0;
+    color: #d1d5db;
+}
+
+.tabs {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+    padding: 14px 22px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    font-weight: bold;
+    color: #374151;
+}
+
+.tab-button.active {
+    border-bottom: 3px solid #2563eb;
+    color: #2563eb;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.kpi-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.kpi {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.kpi h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #2563eb;
+}
+
+.kpi p {
+    margin: 6px 0 0 0;
+    color: #4b5563;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th {
+    background: #111827;
+    color: white;
+    padding: 8px;
+    text-align: left;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+iframe {
+    width: 100%;
+    height: 78vh;
+    border: none;
+    border-radius: 12px;
+}
+</style>
+
+<script>
+function abrirAba(evt, nomeAba) {
+    var i, tabcontent, tabbuttons;
+
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+
+    tabbuttons = document.getElementsByClassName("tab-button");
+    for (i = 0; i < tabbuttons.length; i++) {
+        tabbuttons[i].classList.remove("active");
+    }
+
+    document.getElementById(nomeAba).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+</script>
 </head>
+
 <body>
-    
-    
-    <style>
-        .painel-rotas {
-            position: fixed;
-            top: 12px;
-            right: 12px;
-            z-index: 9999;
-            width: 380px;
-            max-height: 88vh;
-            overflow-y: auto;
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.25);
-            padding: 14px;
-            font-family: Arial, sans-serif;
-            font-size: 13px;
-        }
 
-        .painel-rotas h1 {
-            font-size: 18px;
-            line-height: 1.2;
-            margin: 0 0 8px 0;
-        }
+<div class="header">
+    <h1>Análise de Atendimento Wareclouds</h1>
+    <p>Base analisada dos últimos 3 meses: 2026-01-30 até 2026-04-30</p>
+</div>
 
-        .painel-rotas h2 {
-            font-size: 14px;
-            margin: 14px 0 6px 0;
-        }
+<div class="tabs">
+    <button class="tab-button active" onclick="abrirAba(event, 'mapa')">Mapa Interativo</button>
+    <button class="tab-button" onclick="abrirAba(event, 'analise')">Análise e Propostas</button>
+    <button class="tab-button" onclick="abrirAba(event, 'footprint')">Footprint Sugerido Brasília</button>
+</div>
 
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
+<div id="mapa" class="tab-content active">
+    <div class="card">
+        <iframe src="mapa_analise_wcl_iframe.html"></iframe>
+    </div>
+</div>
 
-        .kpi {
-            background: #f5f5f5;
-            border-radius: 10px;
-            padding: 8px;
-        }
+<div id="analise" class="tab-content">
 
-        .kpi b {
-            display: block;
-            font-size: 11px;
-            color: #555;
-        }
-
-        .kpi span {
-            font-size: 15px;
-            font-weight: bold;
-            color: #111;
-        }
-
-        .rota-card {
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 8px;
-            background: #fafafa;
-        }
-
-        .rota-card button {
-            border: none;
-            background: #111827;
-            color: white;
-            border-radius: 8px;
-            padding: 6px 8px;
-            cursor: pointer;
-            margin-top: 6px;
-            width: 100%;
-        }
-
-        .rota-card button:hover {
-            background: #374151;
-        }
-
-        .busca {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            margin: 6px 0 10px 0;
-            box-sizing: border-box;
-        }
-
-        .cliente-lista {
-            max-height: 180px;
-            overflow-y: auto;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 6px;
-            background: #fff;
-        }
-
-        .cliente-item {
-            padding: 6px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-
-        .cliente-item:hover {
-            background: #f0f0f0;
-        }
-
-        .cliente-item:last-child {
-            border-bottom: none;
-        }
-
-        @media (max-width: 800px) {
-            .painel-rotas {
-                left: 8px;
-                right: 8px;
-                top: auto;
-                bottom: 8px;
-                width: auto;
-                max-height: 45vh;
-            }
-        }
-    </style>
-
-    <div class="painel-rotas">
-        <h1>Mapa Interativo - Roteirização PG 600</h1>
-
-        <div class="kpi-grid">
-            <div class="kpi"><b>Rotas</b><span>1</span></div>
-            <div class="kpi"><b>Entregas</b><span>25</span></div>
-            <div class="kpi"><b>Peso total</b><span>7,770 kg</span></div>
-            <div class="kpi"><b>Caixas</b><span>300</span></div>
+    <div class="kpi-container">
+        <div class="kpi">
+            <h2>7,686</h2>
+            <p>PDVs únicos analisados</p>
         </div>
 
-        <h2>Buscar cliente</h2>
-        <input id="buscaCliente" class="busca" placeholder="Digite nome ou código do cliente..." oninput="filtrarClientes()">
-        <div id="listaClientes" class="cliente-lista"></div>
+        <div class="kpi">
+            <h2>3,307</h2>
+            <p>PDVs únicos elegíveis WCL</p>
+        </div>
 
-        <h2>Resumo das rotas</h2>
-        <div id="resumoRotas"></div>
+        <div class="kpi">
+            <h2>4,379</h2>
+            <p>PDVs únicos não elegíveis WCL</p>
+        </div>
+
+        <div class="kpi">
+            <h2>1,041,081</h2>
+            <p>Cx total analisada 3M</p>
+        </div>
     </div>
 
-    <script>
-        const ROTAS_DADOS = [{"Rota": 1, "Placa_Principal": "NAQ8D19", "Capacidade_Kg": 8710.0, "Peso_Total": 7770.0, "Ocupacao": 0.8920780711825488, "Caixas_Total": 300.0, "Qtd_Entregas": 25, "Distancia_Aprox_Km": 163.40316929338118, "Centroide_Lat": -15.79005488, "Centroide_Lon": -47.903811839999996, "Raio_Km": 33.72725319459915, "Clientes": [{"Nome_Fantasia": "SAMAMBAR", "Codigo_Cliente": 64698, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.869308, "Longitude": -48.09004}, {"Nome_Fantasia": "Bar dos Pescadores", "Codigo_Cliente": 6305, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.829449, "Longitude": -48.05708}, {"Nome_Fantasia": "FAUSTO MANOEL", "Codigo_Cliente": 53341, "Peso": 155.39999999999998, "Caixas_Corrigidas": 6, "Latitude": -15.83546, "Longitude": -48.03756}, {"Nome_Fantasia": "Libanus", "Codigo_Cliente": 25300, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.837286, "Longitude": -48.02013}, {"Nome_Fantasia": "Caminito", "Codigo_Cliente": 59027, "Peso": 129.5, "Caixas_Corrigidas": 5, "Latitude": -15.83784, "Longitude": -48.01332}, {"Nome_Fantasia": "Chalé da traira", "Codigo_Cliente": 462, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.845925, "Longitude": -47.966915}, {"Nome_Fantasia": "Avenida do Espetinho", "Codigo_Cliente": 40152, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.866807, "Longitude": -47.96312}, {"Nome_Fantasia": "PAPAYA", "Codigo_Cliente": 67941, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.834296, "Longitude": -47.921528}, {"Nome_Fantasia": "FAUSTO ASA SUL", "Codigo_Cliente": 91156, "Peso": 155.39999999999998, "Caixas_Corrigidas": 6, "Latitude": -15.818284, "Longitude": -47.89601}, {"Nome_Fantasia": "Libanus", "Codigo_Cliente": 57513, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.815095, "Longitude": -47.89399}, {"Nome_Fantasia": "Caminito", "Codigo_Cliente": 60272, "Peso": 129.5, "Caixas_Corrigidas": 5, "Latitude": -15.813278, "Longitude": -47.890564}, {"Nome_Fantasia": "ORDINARIO BAR", "Codigo_Cliente": 64650, "Peso": 1036.0, "Caixas_Corrigidas": 40, "Latitude": -15.800896, "Longitude": -47.882084}, {"Nome_Fantasia": "DEBOCHE", "Codigo_Cliente": 45821, "Peso": 518.0, "Caixas_Corrigidas": 20, "Latitude": -15.783753, "Longitude": -47.878433}, {"Nome_Fantasia": "BOTECO CAJU LIMAO", "Codigo_Cliente": 66221, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.783431, "Longitude": -47.878662}, {"Nome_Fantasia": "Caminito", "Codigo_Cliente": 52543, "Peso": 129.5, "Caixas_Corrigidas": 5, "Latitude": -15.779764, "Longitude": -47.87561}, {"Nome_Fantasia": "ORIGEN BAR LTDA", "Codigo_Cliente": 68740, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.777061, "Longitude": -47.878501}, {"Nome_Fantasia": "FAUSTO MANUEL ASA NO", "Codigo_Cliente": 31749, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.757762, "Longitude": -47.883636}, {"Nome_Fantasia": "Caminito", "Codigo_Cliente": 61235, "Peso": 129.5, "Caixas_Corrigidas": 5, "Latitude": -15.795452, "Longitude": -47.91654}, {"Nome_Fantasia": "CAJU LIMAO SIG", "Codigo_Cliente": 65634, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.795342, "Longitude": -47.916706}, {"Nome_Fantasia": "FAUSTO E MANOEL", "Codigo_Cliente": 26151, "Peso": 207.2, "Caixas_Corrigidas": 8, "Latitude": -15.798272, "Longitude": -47.920406}, {"Nome_Fantasia": "FAUSTO MANOEL", "Codigo_Cliente": 26525, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.825675, "Longitude": -47.871708}, {"Nome_Fantasia": "VISTA DO LAGO BAR E", "Codigo_Cliente": 69199, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.786411, "Longitude": -47.833891}, {"Nome_Fantasia": "P10", "Codigo_Cliente": 64154, "Peso": 777.0, "Caixas_Corrigidas": 30, "Latitude": -15.641624, "Longitude": -47.79728}, {"Nome_Fantasia": "FIGUEIREDO COZINHA E", "Codigo_Cliente": 67356, "Peso": 259.0, "Caixas_Corrigidas": 10, "Latitude": -15.621256, "Longitude": -47.65468}, {"Nome_Fantasia": "Bar do Carlinhos", "Codigo_Cliente": 44433, "Peso": 777.0, "Caixas_Corrigidas": 30, "Latitude": -15.601645, "Longitude": -47.656902}], "Placas_Reserva": ["KAY6619"]}];
+    <div class="card">
+        <h2>Resumo por casa Wareclouds</h2>
+        <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Casa_WCL</th>
+      <th>Bairro_WCL</th>
+      <th>PDVs_Unicos_Elegiveis</th>
+      <th>Entregas_3M</th>
+      <th>Cx_Total_3M</th>
+      <th>Cx_Media_Por_Entrega</th>
+      <th>Distancia_Media_KM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>camila gomes de oliveira</td>
+      <td>taguatinga norte</td>
+      <td>332</td>
+      <td>1860</td>
+      <td>5613.79</td>
+      <td>2.62</td>
+      <td>2.04</td>
+    </tr>
+    <tr>
+      <td>carlos xavier martins junior</td>
+      <td>sobradinho ii</td>
+      <td>241</td>
+      <td>1391</td>
+      <td>4217.69</td>
+      <td>2.77</td>
+      <td>2.28</td>
+    </tr>
+    <tr>
+      <td>davi santos ferreira</td>
+      <td>planaltina</td>
+      <td>201</td>
+      <td>1604</td>
+      <td>4221.23</td>
+      <td>2.32</td>
+      <td>1.92</td>
+    </tr>
+    <tr>
+      <td>dayanne rodrigues</td>
+      <td>ceilandia norte</td>
+      <td>313</td>
+      <td>1891</td>
+      <td>5108.96</td>
+      <td>2.42</td>
+      <td>1.58</td>
+    </tr>
+    <tr>
+      <td>leanderson spinola</td>
+      <td>brazlândia</td>
+      <td>122</td>
+      <td>705</td>
+      <td>2097.76</td>
+      <td>2.40</td>
+      <td>1.90</td>
+    </tr>
+    <tr>
+      <td>leonardo vinicius</td>
+      <td>taguatinga sul</td>
+      <td>606</td>
+      <td>2921</td>
+      <td>9013.50</td>
+      <td>2.59</td>
+      <td>2.93</td>
+    </tr>
+    <tr>
+      <td>lucas nascimento</td>
+      <td>paranoá</td>
+      <td>289</td>
+      <td>1867</td>
+      <td>5862.54</td>
+      <td>2.82</td>
+      <td>1.72</td>
+    </tr>
+    <tr>
+      <td>maria dilma souza</td>
+      <td>ceilândia oeste</td>
+      <td>222</td>
+      <td>1140</td>
+      <td>3066.42</td>
+      <td>2.32</td>
+      <td>1.52</td>
+    </tr>
+    <tr>
+      <td>raaby teixeira veloso rocha</td>
+      <td>ceilândia sul</td>
+      <td>227</td>
+      <td>1286</td>
+      <td>3514.77</td>
+      <td>2.49</td>
+      <td>1.53</td>
+    </tr>
+    <tr>
+      <td>valéria amaral</td>
+      <td>guará ii</td>
+      <td>417</td>
+      <td>2549</td>
+      <td>8148.58</td>
+      <td>2.84</td>
+      <td>2.66</td>
+    </tr>
+    <tr>
+      <td>wilton ferreira de andrade</td>
+      <td>planaltina ii</td>
+      <td>337</td>
+      <td>2126</td>
+      <td>6210.53</td>
+      <td>2.69</td>
+      <td>2.51</td>
+    </tr>
+  </tbody>
+</table>
+    </div>
 
-        function formatarNumero(valor, casas=0) {
-            return Number(valor).toLocaleString("pt-BR", {
-                minimumFractionDigits: casas,
-                maximumFractionDigits: casas
-            });
-        }
+    <div class="card">
+        <h2>Análise de cenários de premissa</h2>
+        <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Cenário</th>
+      <th>Limite Cx média por entrega</th>
+      <th>Raio KM</th>
+      <th>PDVs únicos elegíveis</th>
+      <th>Entregas 3M elegíveis</th>
+      <th>Cx total 3M elegível</th>
+      <th>PDVs únicos não elegíveis</th>
+      <th>Entregas 3M não elegíveis</th>
+      <th>Incremento PDVs únicos vs atual</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Atual - até 6 Cx e 5 Km</td>
+      <td>6</td>
+      <td>5</td>
+      <td>3307</td>
+      <td>19340</td>
+      <td>57075.77</td>
+      <td>4379</td>
+      <td>40791</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Proposta - até 10 Cx e 5 Km</td>
+      <td>10</td>
+      <td>5</td>
+      <td>4025</td>
+      <td>26095</td>
+      <td>110405.46</td>
+      <td>3661</td>
+      <td>34036</td>
+      <td>718</td>
+    </tr>
+    <tr>
+      <td>Proposta - até 6 Cx e 7 Km</td>
+      <td>6</td>
+      <td>7</td>
+      <td>3802</td>
+      <td>22212</td>
+      <td>65557.03</td>
+      <td>3884</td>
+      <td>37919</td>
+      <td>495</td>
+    </tr>
+    <tr>
+      <td>Proposta - até 10 Cx e 7 Km</td>
+      <td>10</td>
+      <td>7</td>
+      <td>4622</td>
+      <td>29920</td>
+      <td>126151.22</td>
+      <td>3064</td>
+      <td>30211</td>
+      <td>1315</td>
+    </tr>
+    <tr>
+      <td>Proposta - até 10 Cx e 10 Km</td>
+      <td>10</td>
+      <td>10</td>
+      <td>5435</td>
+      <td>35618</td>
+      <td>151230.78</td>
+      <td>2251</td>
+      <td>24513</td>
+      <td>2128</td>
+    </tr>
+  </tbody>
+</table>
+    </div>
 
-        function carregarResumoRotas() {
-            const box = document.getElementById("resumoRotas");
-            let html = "";
+    <div class="card">
+        <h2>Sugestão de regiões para nova casa</h2>
+        <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Sugestão</th>
+      <th>Latitude Sugerida</th>
+      <th>Longitude Sugerida</th>
+      <th>Área referência</th>
+      <th>PDVs únicos até 5Km e 6Cx</th>
+      <th>PDVs únicos até 5Km e 10Cx</th>
+      <th>Entregas 3M até 5Km e 6Cx</th>
+      <th>Entregas 3M até 5Km e 10Cx</th>
+      <th>Cx Total Região 6Cx</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Nova casa sugerida 1</td>
+      <td>-15.79</td>
+      <td>-47.91</td>
+      <td>Sem área no roteirizador</td>
+      <td>726</td>
+      <td>891</td>
+      <td>4747</td>
+      <td>6635</td>
+      <td>14816.86</td>
+    </tr>
+    <tr>
+      <td>Nova casa sugerida 2</td>
+      <td>-15.78</td>
+      <td>-47.91</td>
+      <td>Sem área no roteirizador</td>
+      <td>726</td>
+      <td>887</td>
+      <td>4743</td>
+      <td>6600</td>
+      <td>14777.61</td>
+    </tr>
+    <tr>
+      <td>Nova casa sugerida 3</td>
+      <td>-15.79</td>
+      <td>-47.89</td>
+      <td>Sem área no roteirizador</td>
+      <td>725</td>
+      <td>892</td>
+      <td>4749</td>
+      <td>6677</td>
+      <td>14928.82</td>
+    </tr>
+    <tr>
+      <td>Nova casa sugerida 4</td>
+      <td>-15.79</td>
+      <td>-47.91</td>
+      <td>Sem área no roteirizador</td>
+      <td>725</td>
+      <td>891</td>
+      <td>4741</td>
+      <td>6646</td>
+      <td>14812.88</td>
+    </tr>
+    <tr>
+      <td>Nova casa sugerida 5</td>
+      <td>-15.79</td>
+      <td>-47.89</td>
+      <td>Sem área no roteirizador</td>
+      <td>724</td>
+      <td>891</td>
+      <td>4759</td>
+      <td>6687</td>
+      <td>14960.67</td>
+    </tr>
+    <tr>
+      <td>Nova casa sugerida 6</td>
+      <td>-15.79</td>
+      <td>-47.89</td>
+      <td>Sem área no roteirizador</td>
+      <td>724</td>
+      <td>891</td>
+      <td>4758</td>
+      <td>6686</td>
+      <td>14964.28</td>
+    </tr>
+    <tr>
+      <td>Nova casa sugerida 7</td>
+      <td>-15.79</td>
+      <td>-47.89</td>
+      <td>Sem área no roteirizador</td>
+      <td>724</td>
+      <td>891</td>
+      <td>4748</td>
+      <td>6676</td>
+      <td>14924.07</td>
+    </tr>
+    <tr>
+      <td>Nova casa sugerida 8</td>
+      <td>-15.79</td>
+      <td>-47.91</td>
+      <td>Sem área no roteirizador</td>
+      <td>724</td>
+      <td>890</td>
+      <td>4728</td>
+      <td>6641</td>
+      <td>14731.73</td>
+    </tr>
+  </tbody>
+</table>
+    </div>
 
-            ROTAS_DADOS.forEach(r => {
-                html += `
-                    <div class="rota-card">
-                        <b>Rota ${r.Rota} - ${r.Placa_Principal}</b><br>
-                        <span>Reservas: ${r.Placas_Reserva && r.Placas_Reserva.length ? r.Placas_Reserva.join(", ") : "Sem reserva compatível"}</span><br>
-                        <span>Entregas: ${r.Qtd_Entregas}</span><br>
-                        <span>Peso: ${formatarNumero(r.Peso_Total, 0)} kg</span><br>
-                        <span>Capacidade: ${formatarNumero(r.Capacidade_Kg, 0)} kg</span><br>
-                        <span>Ocupação: ${(r.Ocupacao * 100).toFixed(1)}%</span><br>
-                        <span>Raio: ${r.Raio_Km.toFixed(1)} km</span><br>
-                        <span>Distância aprox.: ${r.Distancia_Aprox_Km.toFixed(1)} km</span>
-                        <button onclick="focarRota(${r.Centroide_Lat}, ${r.Centroide_Lon}, ${r.Raio_Km})">Focar rota</button>
-                    </div>
-                `;
-            });
+</div>
 
-            box.innerHTML = html;
-        }
+<div id="footprint" class="tab-content">
 
-        function todosClientes() {
-            let clientes = [];
-            ROTAS_DADOS.forEach(r => {
-                r.Clientes.forEach((c, idx) => {
-                    clientes.push({
-                        rota: r.Rota,
-                        placa: r.Placa_Principal,
-                        ordem: idx + 1,
-                        nome: c.Nome_Fantasia,
-                        codigo: c.Codigo_Cliente,
-                        peso: c.Peso,
-                        caixas: c.Caixas_Corrigidas,
-                        lat: c.Latitude,
-                        lon: c.Longitude,
-                        qtdEntregasRota: r.Qtd_Entregas,
-                        pesoRota: r.Peso_Total,
-                        raio: r.Raio_Km
-                    });
-                });
-            });
-            return clientes;
-        }
+    <div class="card">
+        <h2>Footprint sugerido por área de Brasília</h2>
+        <p>
+        Esta aba usa o <b>PDV como unidade principal</b> e abre o histórico por dia da semana
+        apenas para sugerir melhor recorte operacional de atendimento.
+        </p>
+        <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Base_Roteirizador</th>
+      <th>Area_Brasilia</th>
+      <th>Dia_Semana_Num</th>
+      <th>Dia sugerido WCL</th>
+      <th>PDVs únicos no dia</th>
+      <th>Entregas_3M</th>
+      <th>Cx_Total</th>
+      <th>Cx_Media_Entrega</th>
+      <th>PDVs elegíveis WCL no dia</th>
+      <th>Distancia_Media_WCL</th>
+      <th>% elegível WCL</th>
+      <th>Ação sugerida</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BSB</td>
+      <td>142 - Asa Norte Inicio</td>
+      <td>0</td>
+      <td>Segunda</td>
+      <td>1</td>
+      <td>5</td>
+      <td>437.9</td>
+      <td>87.58</td>
+      <td>0</td>
+      <td>11.20</td>
+      <td>0.0</td>
+      <td>Avaliar nova casa próxima</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>5</td>
+      <td>Sábado</td>
+      <td>3925</td>
+      <td>12</td>
+      <td>156043.5</td>
+      <td>14.84</td>
+      <td>3880</td>
+      <td>4.24</td>
+      <td>98.9</td>
+      <td>Priorizar WCL nesse dia/área</td>
+    </tr>
+  </tbody>
+</table>
+    </div>
 
-        function filtrarClientes() {
-            const termo = document.getElementById("buscaCliente").value.toLowerCase().trim();
-            const lista = document.getElementById("listaClientes");
+    <div class="card">
+        <h2>Detalhamento por área e dia da semana</h2>
+        <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Base_Roteirizador</th>
+      <th>Area_Brasilia</th>
+      <th>Dia_Semana_Num</th>
+      <th>Dia_Semana</th>
+      <th>PDVs_Unicos</th>
+      <th>Entregas_3M</th>
+      <th>Cx_Total</th>
+      <th>Cx_Media_Entrega</th>
+      <th>PDVs_Elegiveis_WCL</th>
+      <th>Distancia_Media_WCL</th>
+      <th>% PDVs Elegíveis WCL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BSB</td>
+      <td>142 - Asa Norte Inicio</td>
+      <td>0</td>
+      <td>Segunda</td>
+      <td>1</td>
+      <td>5</td>
+      <td>437.90</td>
+      <td>87.58</td>
+      <td>0</td>
+      <td>11.20</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>BSB</td>
+      <td>142 - Asa Norte Inicio</td>
+      <td>1</td>
+      <td>Terça</td>
+      <td>1</td>
+      <td>12</td>
+      <td>913.20</td>
+      <td>76.10</td>
+      <td>0</td>
+      <td>11.20</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>BSB</td>
+      <td>142 - Asa Norte Inicio</td>
+      <td>2</td>
+      <td>Quarta</td>
+      <td>1</td>
+      <td>3</td>
+      <td>95.97</td>
+      <td>31.99</td>
+      <td>0</td>
+      <td>11.20</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>BSB</td>
+      <td>142 - Asa Norte Inicio</td>
+      <td>3</td>
+      <td>Quinta</td>
+      <td>1</td>
+      <td>5</td>
+      <td>252.11</td>
+      <td>50.42</td>
+      <td>0</td>
+      <td>11.20</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>BSB</td>
+      <td>142 - Asa Norte Inicio</td>
+      <td>4</td>
+      <td>Sexta</td>
+      <td>1</td>
+      <td>7</td>
+      <td>229.02</td>
+      <td>32.72</td>
+      <td>0</td>
+      <td>11.20</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>BSB</td>
+      <td>142 - Asa Norte Inicio</td>
+      <td>5</td>
+      <td>Sábado</td>
+      <td>1</td>
+      <td>3</td>
+      <td>95.10</td>
+      <td>31.70</td>
+      <td>0</td>
+      <td>11.20</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>0</td>
+      <td>Segunda</td>
+      <td>3891</td>
+      <td>12</td>
+      <td>125216.75</td>
+      <td>13.98</td>
+      <td>3300</td>
+      <td>4.51</td>
+      <td>84.8</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>1</td>
+      <td>Terça</td>
+      <td>3250</td>
+      <td>12</td>
+      <td>169079.39</td>
+      <td>18.89</td>
+      <td>2562</td>
+      <td>4.79</td>
+      <td>78.8</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>2</td>
+      <td>Quarta</td>
+      <td>3897</td>
+      <td>12</td>
+      <td>170143.49</td>
+      <td>16.41</td>
+      <td>3107</td>
+      <td>4.68</td>
+      <td>79.7</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>3</td>
+      <td>Quinta</td>
+      <td>3861</td>
+      <td>13</td>
+      <td>208838.68</td>
+      <td>18.22</td>
+      <td>3601</td>
+      <td>4.81</td>
+      <td>93.3</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>4</td>
+      <td>Sexta</td>
+      <td>3637</td>
+      <td>12</td>
+      <td>198453.50</td>
+      <td>20.17</td>
+      <td>2890</td>
+      <td>4.82</td>
+      <td>79.5</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>5</td>
+      <td>Sábado</td>
+      <td>3925</td>
+      <td>12</td>
+      <td>156043.50</td>
+      <td>14.84</td>
+      <td>3880</td>
+      <td>4.24</td>
+      <td>98.9</td>
+    </tr>
+    <tr>
+      <td>Sem base</td>
+      <td>Sem área no roteirizador</td>
+      <td>6</td>
+      <td>Domingo</td>
+      <td>6</td>
+      <td>2</td>
+      <td>11282.02</td>
+      <td>1880.34</td>
+      <td>0</td>
+      <td>9.03</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+    </div>
 
-            const clientes = todosClientes().filter(c =>
-                String(c.nome).toLowerCase().includes(termo) ||
-                String(c.codigo).toLowerCase().includes(termo)
-            ).slice(0, 60);
+</div>
 
-            let html = "";
-
-            clientes.forEach(c => {
-                html += `
-                    <div class="cliente-item" onclick="focarCliente(${c.lat}, ${c.lon})">
-                        <b>${c.nome}</b><br>
-                        Código: ${c.codigo} | Rota ${c.rota} | Ordem ${c.ordem}<br>
-                        Peso: ${formatarNumero(c.peso, 1)} kg | Cx: ${formatarNumero(c.caixas, 1)}<br>
-                        Carro: ${c.placa} | Entregas na rota: ${c.qtdEntregasRota} | Raio: ${c.raio.toFixed(1)} km
-                    </div>
-                `;
-            });
-
-            lista.innerHTML = html || "<div style='padding:8px;color:#777;'>Nenhum cliente encontrado.</div>";
-        }
-
-        function focarCliente(lat, lon) {
-            map.setView([lat, lon], 15);
-        }
-
-        function focarRota(lat, lon, raioKm) {
-            let zoom = 12;
-            if (raioKm > 20) zoom = 10;
-            if (raioKm > 40) zoom = 9;
-            if (raioKm < 5) zoom = 13;
-            map.setView([lat, lon], zoom);
-        }
-
-        setTimeout(() => {
-            carregarResumoRotas();
-            filtrarClientes();
-        }, 500);
-    </script>
-    
-    
-            <div class="folium-map" id="map_722645d1d2ea9a6052152f44e6a8cf25" ></div>
-        
 </body>
-<script>
-    
-    
-            var map_722645d1d2ea9a6052152f44e6a8cf25 = L.map(
-                "map_722645d1d2ea9a6052152f44e6a8cf25",
-                {
-                    center: [-15.790054879999998, -47.903811839999996],
-                    crs: L.CRS.EPSG3857,
-                    ...{
-  "zoom": 11,
-  "zoomControl": true,
-  "preferCanvas": false,
-}
-
-                }
-            );
-            L.control.scale().addTo(map_722645d1d2ea9a6052152f44e6a8cf25);
-
-            
-
-        
-    
-            var tile_layer_56522fc4ff7e1a863e34ac740fbabeff = L.tileLayer(
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {
-  "minZoom": 0,
-  "maxZoom": 19,
-  "maxNativeZoom": 19,
-  "noWrap": false,
-  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
-  "subdomains": "abc",
-  "detectRetina": false,
-  "tms": false,
-  "opacity": 1,
-}
-
-            );
-        
-    
-            tile_layer_56522fc4ff7e1a863e34ac740fbabeff.addTo(map_722645d1d2ea9a6052152f44e6a8cf25);
-        
-    
-            var marker_bf3f82c354b1febd47f1431c501706fd = L.marker(
-                [-16.002029850929986, -48.052193879663754],
-                {
-}
-            ).addTo(map_722645d1d2ea9a6052152f44e6a8cf25);
-        
-    
-            var icon_274e3689ef9b1b4eea7d9f1606e54879 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "black",
-  "iconColor": "white",
-  "icon": "home",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_27c49eee03d4617ba805debe80490fa7 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_f2fb5b57f8108db5372355e846210571 = $(`<div id="html_f2fb5b57f8108db5372355e846210571" style="width: 100.0%; height: 100.0%;"><b>Centro Logístico</b></div>`)[0];
-                popup_27c49eee03d4617ba805debe80490fa7.setContent(html_f2fb5b57f8108db5372355e846210571);
-            
-        
-
-        marker_bf3f82c354b1febd47f1431c501706fd.bindPopup(popup_27c49eee03d4617ba805debe80490fa7)
-        ;
-
-        
-    
-    
-            marker_bf3f82c354b1febd47f1431c501706fd.bindTooltip(
-                `<div>
-                     Centro Logístico
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_bf3f82c354b1febd47f1431c501706fd.setIcon(icon_274e3689ef9b1b4eea7d9f1606e54879);
-            
-    
-            var feature_group_5d6707eafda4e3d4baa19b3d33c2d217 = L.featureGroup(
-                {
-}
-            );
-        
-    
-            var marker_7be2937e38f676c2d671a3651b35d6df = L.marker(
-                [-15.869308, -48.09004],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_3be8ad8adbb2fd838e24953c2f75c310 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_fb7cf4eafcdd76be45e558a9f43e3aed = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_9ed8d0e1533b98e385688df4b93197d2 = $(`<div id="html_9ed8d0e1533b98e385688df4b93197d2" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">SAMAMBAR</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 1<br>                 <b>Código Cliente:</b> 64698<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_fb7cf4eafcdd76be45e558a9f43e3aed.setContent(html_9ed8d0e1533b98e385688df4b93197d2);
-            
-        
-
-        marker_7be2937e38f676c2d671a3651b35d6df.bindPopup(popup_fb7cf4eafcdd76be45e558a9f43e3aed)
-        ;
-
-        
-    
-    
-            marker_7be2937e38f676c2d671a3651b35d6df.bindTooltip(
-                `<div>
-                     Rota 1 | SAMAMBAR | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_7be2937e38f676c2d671a3651b35d6df.setIcon(icon_3be8ad8adbb2fd838e24953c2f75c310);
-            
-    
-            var marker_a5aaf80f5b03dbfc41aac93ab7488203 = L.marker(
-                [-15.829449, -48.05708],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_3575ebf1a67dd2719a1ed4ffdec7455a = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_0bcd19ce6bb72cbd0c50f8c4748c8e53 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_6db9d789fe7dfcfd3132b085c71d6fb2 = $(`<div id="html_6db9d789fe7dfcfd3132b085c71d6fb2" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Bar dos Pescadores</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 2<br>                 <b>Código Cliente:</b> 6305<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_0bcd19ce6bb72cbd0c50f8c4748c8e53.setContent(html_6db9d789fe7dfcfd3132b085c71d6fb2);
-            
-        
-
-        marker_a5aaf80f5b03dbfc41aac93ab7488203.bindPopup(popup_0bcd19ce6bb72cbd0c50f8c4748c8e53)
-        ;
-
-        
-    
-    
-            marker_a5aaf80f5b03dbfc41aac93ab7488203.bindTooltip(
-                `<div>
-                     Rota 1 | Bar dos Pescadores | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_a5aaf80f5b03dbfc41aac93ab7488203.setIcon(icon_3575ebf1a67dd2719a1ed4ffdec7455a);
-            
-    
-            var marker_1b86ef03200a9177f441c1536989b921 = L.marker(
-                [-15.83546, -48.03756],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_2a8ab30e05ef28d2c413e561ed86d3e6 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_abad1e530e8cf9dc478bbececbf2d02b = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_ffa0cea27890a035454043aa51d97bae = $(`<div id="html_ffa0cea27890a035454043aa51d97bae" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">FAUSTO MANOEL</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 3<br>                 <b>Código Cliente:</b> 53341<br>                 <b>Peso:</b> 155.40 kg<br>                 <b>Caixas Corrigidas:</b> 6.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_abad1e530e8cf9dc478bbececbf2d02b.setContent(html_ffa0cea27890a035454043aa51d97bae);
-            
-        
-
-        marker_1b86ef03200a9177f441c1536989b921.bindPopup(popup_abad1e530e8cf9dc478bbececbf2d02b)
-        ;
-
-        
-    
-    
-            marker_1b86ef03200a9177f441c1536989b921.bindTooltip(
-                `<div>
-                     Rota 1 | FAUSTO MANOEL | 155 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_1b86ef03200a9177f441c1536989b921.setIcon(icon_2a8ab30e05ef28d2c413e561ed86d3e6);
-            
-    
-            var marker_01a025140dca41c06fc7892d913f335d = L.marker(
-                [-15.837286, -48.02013],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_e29f582bdbba613cc20ea8ced0a5227b = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_9c723a56743f33de426ac9558eb0a923 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_890b424e10710d6629d151928d62c959 = $(`<div id="html_890b424e10710d6629d151928d62c959" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Libanus</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 4<br>                 <b>Código Cliente:</b> 25300<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_9c723a56743f33de426ac9558eb0a923.setContent(html_890b424e10710d6629d151928d62c959);
-            
-        
-
-        marker_01a025140dca41c06fc7892d913f335d.bindPopup(popup_9c723a56743f33de426ac9558eb0a923)
-        ;
-
-        
-    
-    
-            marker_01a025140dca41c06fc7892d913f335d.bindTooltip(
-                `<div>
-                     Rota 1 | Libanus | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_01a025140dca41c06fc7892d913f335d.setIcon(icon_e29f582bdbba613cc20ea8ced0a5227b);
-            
-    
-            var marker_e68121395804c4b7b938ad9de91d88e8 = L.marker(
-                [-15.83784, -48.01332],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_3e2aa56aa8d2818017a3232a00f320a4 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_3304dbfb1833cfb71f4cd62cc6367adb = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_d6ca0828f1fe5cbc06f2aab137182e39 = $(`<div id="html_d6ca0828f1fe5cbc06f2aab137182e39" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Caminito</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 5<br>                 <b>Código Cliente:</b> 59027<br>                 <b>Peso:</b> 129.50 kg<br>                 <b>Caixas Corrigidas:</b> 5.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_3304dbfb1833cfb71f4cd62cc6367adb.setContent(html_d6ca0828f1fe5cbc06f2aab137182e39);
-            
-        
-
-        marker_e68121395804c4b7b938ad9de91d88e8.bindPopup(popup_3304dbfb1833cfb71f4cd62cc6367adb)
-        ;
-
-        
-    
-    
-            marker_e68121395804c4b7b938ad9de91d88e8.bindTooltip(
-                `<div>
-                     Rota 1 | Caminito | 130 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_e68121395804c4b7b938ad9de91d88e8.setIcon(icon_3e2aa56aa8d2818017a3232a00f320a4);
-            
-    
-            var marker_eb3dd9dc75dd3448e92908d119f7f932 = L.marker(
-                [-15.845925, -47.966915],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_268f26d96b87f44009fcf06bf58d6d50 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_19c7a110a560598554bca4580427774c = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_550d6d6357ab6008af36e903f2633745 = $(`<div id="html_550d6d6357ab6008af36e903f2633745" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Chalé da traira</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 6<br>                 <b>Código Cliente:</b> 462<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_19c7a110a560598554bca4580427774c.setContent(html_550d6d6357ab6008af36e903f2633745);
-            
-        
-
-        marker_eb3dd9dc75dd3448e92908d119f7f932.bindPopup(popup_19c7a110a560598554bca4580427774c)
-        ;
-
-        
-    
-    
-            marker_eb3dd9dc75dd3448e92908d119f7f932.bindTooltip(
-                `<div>
-                     Rota 1 | Chalé da traira | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_eb3dd9dc75dd3448e92908d119f7f932.setIcon(icon_268f26d96b87f44009fcf06bf58d6d50);
-            
-    
-            var marker_78350f86d9162782886bf0ed4f1bea8f = L.marker(
-                [-15.866807, -47.96312],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_823d15d6b87627f3366395500f6d9408 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_2842815108a5e3840bd78b83f2846d3a = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_437fbfffc860c119f64dd030c48411ec = $(`<div id="html_437fbfffc860c119f64dd030c48411ec" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Avenida do Espetinho</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 7<br>                 <b>Código Cliente:</b> 40152<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_2842815108a5e3840bd78b83f2846d3a.setContent(html_437fbfffc860c119f64dd030c48411ec);
-            
-        
-
-        marker_78350f86d9162782886bf0ed4f1bea8f.bindPopup(popup_2842815108a5e3840bd78b83f2846d3a)
-        ;
-
-        
-    
-    
-            marker_78350f86d9162782886bf0ed4f1bea8f.bindTooltip(
-                `<div>
-                     Rota 1 | Avenida do Espetinho | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_78350f86d9162782886bf0ed4f1bea8f.setIcon(icon_823d15d6b87627f3366395500f6d9408);
-            
-    
-            var marker_9e915b1e81948372616c75cb50dbd356 = L.marker(
-                [-15.834296, -47.921528],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_815258ec9c8328a85141f227c26884e5 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_f23f7585ab8dfd487336302f5c48e562 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_3e55de69033a34f545ac0755b522eed0 = $(`<div id="html_3e55de69033a34f545ac0755b522eed0" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">PAPAYA</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 8<br>                 <b>Código Cliente:</b> 67941<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_f23f7585ab8dfd487336302f5c48e562.setContent(html_3e55de69033a34f545ac0755b522eed0);
-            
-        
-
-        marker_9e915b1e81948372616c75cb50dbd356.bindPopup(popup_f23f7585ab8dfd487336302f5c48e562)
-        ;
-
-        
-    
-    
-            marker_9e915b1e81948372616c75cb50dbd356.bindTooltip(
-                `<div>
-                     Rota 1 | PAPAYA | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_9e915b1e81948372616c75cb50dbd356.setIcon(icon_815258ec9c8328a85141f227c26884e5);
-            
-    
-            var marker_80e46d41457cf69f228c99635f960aa1 = L.marker(
-                [-15.818284, -47.89601],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_8acb57662d4a1c361997607a9c302f8a = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_18a67a02051282f3aeed41a4b8f1c7b9 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_3032cd7f548a6ead5dc265b695214610 = $(`<div id="html_3032cd7f548a6ead5dc265b695214610" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">FAUSTO ASA SUL</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 9<br>                 <b>Código Cliente:</b> 91156<br>                 <b>Peso:</b> 155.40 kg<br>                 <b>Caixas Corrigidas:</b> 6.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_18a67a02051282f3aeed41a4b8f1c7b9.setContent(html_3032cd7f548a6ead5dc265b695214610);
-            
-        
-
-        marker_80e46d41457cf69f228c99635f960aa1.bindPopup(popup_18a67a02051282f3aeed41a4b8f1c7b9)
-        ;
-
-        
-    
-    
-            marker_80e46d41457cf69f228c99635f960aa1.bindTooltip(
-                `<div>
-                     Rota 1 | FAUSTO ASA SUL | 155 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_80e46d41457cf69f228c99635f960aa1.setIcon(icon_8acb57662d4a1c361997607a9c302f8a);
-            
-    
-            var marker_143f591f43b90230b5c15e496df1d7c6 = L.marker(
-                [-15.815095, -47.89399],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_57fe020cc00a0aba56fe8d05fa231453 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_c21e21673aa14fa2bfbbcd684be4051f = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_2c3fcbb0f603a627c93734b5570e85e3 = $(`<div id="html_2c3fcbb0f603a627c93734b5570e85e3" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Libanus</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 10<br>                 <b>Código Cliente:</b> 57513<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_c21e21673aa14fa2bfbbcd684be4051f.setContent(html_2c3fcbb0f603a627c93734b5570e85e3);
-            
-        
-
-        marker_143f591f43b90230b5c15e496df1d7c6.bindPopup(popup_c21e21673aa14fa2bfbbcd684be4051f)
-        ;
-
-        
-    
-    
-            marker_143f591f43b90230b5c15e496df1d7c6.bindTooltip(
-                `<div>
-                     Rota 1 | Libanus | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_143f591f43b90230b5c15e496df1d7c6.setIcon(icon_57fe020cc00a0aba56fe8d05fa231453);
-            
-    
-            var marker_1ef87e6eb20da410e08a4c899dc78490 = L.marker(
-                [-15.813278, -47.890564],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_b4f74fbd21bec3a8f6c010775d44e5da = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_0df5d52c51061aaa72c8a83db41ae977 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_c992b62abae5e731f3a49bd0f4a4b59f = $(`<div id="html_c992b62abae5e731f3a49bd0f4a4b59f" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Caminito</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 11<br>                 <b>Código Cliente:</b> 60272<br>                 <b>Peso:</b> 129.50 kg<br>                 <b>Caixas Corrigidas:</b> 5.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_0df5d52c51061aaa72c8a83db41ae977.setContent(html_c992b62abae5e731f3a49bd0f4a4b59f);
-            
-        
-
-        marker_1ef87e6eb20da410e08a4c899dc78490.bindPopup(popup_0df5d52c51061aaa72c8a83db41ae977)
-        ;
-
-        
-    
-    
-            marker_1ef87e6eb20da410e08a4c899dc78490.bindTooltip(
-                `<div>
-                     Rota 1 | Caminito | 130 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_1ef87e6eb20da410e08a4c899dc78490.setIcon(icon_b4f74fbd21bec3a8f6c010775d44e5da);
-            
-    
-            var marker_67f6c0793cd1a0a182451ed8ae2945ce = L.marker(
-                [-15.800896, -47.882084],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_76af986c7ae9556b9348b07030659d8a = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_f3eef621651355c1fc96a8570d0269a8 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_9df72fd83d55250a272f7ec8c329b4f4 = $(`<div id="html_9df72fd83d55250a272f7ec8c329b4f4" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">ORDINARIO BAR</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 12<br>                 <b>Código Cliente:</b> 64650<br>                 <b>Peso:</b> 1,036.00 kg<br>                 <b>Caixas Corrigidas:</b> 40.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_f3eef621651355c1fc96a8570d0269a8.setContent(html_9df72fd83d55250a272f7ec8c329b4f4);
-            
-        
-
-        marker_67f6c0793cd1a0a182451ed8ae2945ce.bindPopup(popup_f3eef621651355c1fc96a8570d0269a8)
-        ;
-
-        
-    
-    
-            marker_67f6c0793cd1a0a182451ed8ae2945ce.bindTooltip(
-                `<div>
-                     Rota 1 | ORDINARIO BAR | 1,036 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_67f6c0793cd1a0a182451ed8ae2945ce.setIcon(icon_76af986c7ae9556b9348b07030659d8a);
-            
-    
-            var marker_e134c41823ae805ad977cd27506c129f = L.marker(
-                [-15.783753, -47.878433],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_19ae13d9c1da1703aa72b4f143ad9ca2 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_271edb0e4ac4a398374ee39cae69e768 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_01db970ce88a87c31442e25017d7b85c = $(`<div id="html_01db970ce88a87c31442e25017d7b85c" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">DEBOCHE</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 13<br>                 <b>Código Cliente:</b> 45821<br>                 <b>Peso:</b> 518.00 kg<br>                 <b>Caixas Corrigidas:</b> 20.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_271edb0e4ac4a398374ee39cae69e768.setContent(html_01db970ce88a87c31442e25017d7b85c);
-            
-        
-
-        marker_e134c41823ae805ad977cd27506c129f.bindPopup(popup_271edb0e4ac4a398374ee39cae69e768)
-        ;
-
-        
-    
-    
-            marker_e134c41823ae805ad977cd27506c129f.bindTooltip(
-                `<div>
-                     Rota 1 | DEBOCHE | 518 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_e134c41823ae805ad977cd27506c129f.setIcon(icon_19ae13d9c1da1703aa72b4f143ad9ca2);
-            
-    
-            var marker_dd235159ad22a3dbef89dd9b759e4174 = L.marker(
-                [-15.783431, -47.878662],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_f19bea2787bf5cb84e164d318428a378 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_914fbc558d5d992fea37df4a97f83b6e = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_41ac5c934534430c5e87665ffa4065c7 = $(`<div id="html_41ac5c934534430c5e87665ffa4065c7" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">BOTECO CAJU LIMAO</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 14<br>                 <b>Código Cliente:</b> 66221<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_914fbc558d5d992fea37df4a97f83b6e.setContent(html_41ac5c934534430c5e87665ffa4065c7);
-            
-        
-
-        marker_dd235159ad22a3dbef89dd9b759e4174.bindPopup(popup_914fbc558d5d992fea37df4a97f83b6e)
-        ;
-
-        
-    
-    
-            marker_dd235159ad22a3dbef89dd9b759e4174.bindTooltip(
-                `<div>
-                     Rota 1 | BOTECO CAJU LIMAO | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_dd235159ad22a3dbef89dd9b759e4174.setIcon(icon_f19bea2787bf5cb84e164d318428a378);
-            
-    
-            var marker_5f723c174f75f01df7a5c5b723814b1e = L.marker(
-                [-15.779764, -47.87561],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_bd00121932c25def3a83043189e3f1f3 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_4c88fc053aada40db0c816c2866cd6c4 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_984b415b2e773fd5d44043a4a0c33b70 = $(`<div id="html_984b415b2e773fd5d44043a4a0c33b70" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Caminito</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 15<br>                 <b>Código Cliente:</b> 52543<br>                 <b>Peso:</b> 129.50 kg<br>                 <b>Caixas Corrigidas:</b> 5.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_4c88fc053aada40db0c816c2866cd6c4.setContent(html_984b415b2e773fd5d44043a4a0c33b70);
-            
-        
-
-        marker_5f723c174f75f01df7a5c5b723814b1e.bindPopup(popup_4c88fc053aada40db0c816c2866cd6c4)
-        ;
-
-        
-    
-    
-            marker_5f723c174f75f01df7a5c5b723814b1e.bindTooltip(
-                `<div>
-                     Rota 1 | Caminito | 130 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_5f723c174f75f01df7a5c5b723814b1e.setIcon(icon_bd00121932c25def3a83043189e3f1f3);
-            
-    
-            var marker_039abb38a7fa5d45dcfb7d4d7066ddd0 = L.marker(
-                [-15.777061, -47.878501],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_d0b3926dd66f65e43625c39dfa9b4671 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_5af65c2141d298702e1142cc319ff7fe = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_5e4eaa8a32235e4dd651122dac24722d = $(`<div id="html_5e4eaa8a32235e4dd651122dac24722d" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">ORIGEN BAR LTDA</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 16<br>                 <b>Código Cliente:</b> 68740<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_5af65c2141d298702e1142cc319ff7fe.setContent(html_5e4eaa8a32235e4dd651122dac24722d);
-            
-        
-
-        marker_039abb38a7fa5d45dcfb7d4d7066ddd0.bindPopup(popup_5af65c2141d298702e1142cc319ff7fe)
-        ;
-
-        
-    
-    
-            marker_039abb38a7fa5d45dcfb7d4d7066ddd0.bindTooltip(
-                `<div>
-                     Rota 1 | ORIGEN BAR LTDA | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_039abb38a7fa5d45dcfb7d4d7066ddd0.setIcon(icon_d0b3926dd66f65e43625c39dfa9b4671);
-            
-    
-            var marker_c543835eed4c3e5873194cdba62640ff = L.marker(
-                [-15.757762, -47.883636],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_be8daf3722121f558ae4d1f610aaf9b0 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_ada8782775d7114a65c2ff774e3884d4 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_81b30d33474b1cfa095bba86099e4acd = $(`<div id="html_81b30d33474b1cfa095bba86099e4acd" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">FAUSTO MANUEL ASA NO</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 17<br>                 <b>Código Cliente:</b> 31749<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_ada8782775d7114a65c2ff774e3884d4.setContent(html_81b30d33474b1cfa095bba86099e4acd);
-            
-        
-
-        marker_c543835eed4c3e5873194cdba62640ff.bindPopup(popup_ada8782775d7114a65c2ff774e3884d4)
-        ;
-
-        
-    
-    
-            marker_c543835eed4c3e5873194cdba62640ff.bindTooltip(
-                `<div>
-                     Rota 1 | FAUSTO MANUEL ASA NO | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_c543835eed4c3e5873194cdba62640ff.setIcon(icon_be8daf3722121f558ae4d1f610aaf9b0);
-            
-    
-            var marker_cdefd68b13458b56d69b92fef6ada391 = L.marker(
-                [-15.795452, -47.91654],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_6720ac7ddbe0aba4f63acf05b5cb66a8 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_10fb1f4af26633a45be515027c36ccbb = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_c9e241f37502eda017d16124558565e0 = $(`<div id="html_c9e241f37502eda017d16124558565e0" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Caminito</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 18<br>                 <b>Código Cliente:</b> 61235<br>                 <b>Peso:</b> 129.50 kg<br>                 <b>Caixas Corrigidas:</b> 5.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_10fb1f4af26633a45be515027c36ccbb.setContent(html_c9e241f37502eda017d16124558565e0);
-            
-        
-
-        marker_cdefd68b13458b56d69b92fef6ada391.bindPopup(popup_10fb1f4af26633a45be515027c36ccbb)
-        ;
-
-        
-    
-    
-            marker_cdefd68b13458b56d69b92fef6ada391.bindTooltip(
-                `<div>
-                     Rota 1 | Caminito | 130 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_cdefd68b13458b56d69b92fef6ada391.setIcon(icon_6720ac7ddbe0aba4f63acf05b5cb66a8);
-            
-    
-            var marker_4b3c40ffdbdc53884bbeb49b7a76296a = L.marker(
-                [-15.795342, -47.916706],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_f1e21bb6fbc75dacdad9b725310edd3b = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_07e384b941f174fac7683f9192185fd6 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_a710384a13169d360215ca2d2e8ba7d4 = $(`<div id="html_a710384a13169d360215ca2d2e8ba7d4" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">CAJU LIMAO SIG</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 19<br>                 <b>Código Cliente:</b> 65634<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_07e384b941f174fac7683f9192185fd6.setContent(html_a710384a13169d360215ca2d2e8ba7d4);
-            
-        
-
-        marker_4b3c40ffdbdc53884bbeb49b7a76296a.bindPopup(popup_07e384b941f174fac7683f9192185fd6)
-        ;
-
-        
-    
-    
-            marker_4b3c40ffdbdc53884bbeb49b7a76296a.bindTooltip(
-                `<div>
-                     Rota 1 | CAJU LIMAO SIG | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_4b3c40ffdbdc53884bbeb49b7a76296a.setIcon(icon_f1e21bb6fbc75dacdad9b725310edd3b);
-            
-    
-            var marker_7033777b2db45034f63eceddd60e2d3d = L.marker(
-                [-15.798272, -47.920406],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_c59978bf4e0238cf3390229121cc2c11 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_4317d4017e6389a36d2f26eee7dfa75e = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_6bf4d2ef5f3927da8ba1ac678590552d = $(`<div id="html_6bf4d2ef5f3927da8ba1ac678590552d" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">FAUSTO E MANOEL</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 20<br>                 <b>Código Cliente:</b> 26151<br>                 <b>Peso:</b> 207.20 kg<br>                 <b>Caixas Corrigidas:</b> 8.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_4317d4017e6389a36d2f26eee7dfa75e.setContent(html_6bf4d2ef5f3927da8ba1ac678590552d);
-            
-        
-
-        marker_7033777b2db45034f63eceddd60e2d3d.bindPopup(popup_4317d4017e6389a36d2f26eee7dfa75e)
-        ;
-
-        
-    
-    
-            marker_7033777b2db45034f63eceddd60e2d3d.bindTooltip(
-                `<div>
-                     Rota 1 | FAUSTO E MANOEL | 207 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_7033777b2db45034f63eceddd60e2d3d.setIcon(icon_c59978bf4e0238cf3390229121cc2c11);
-            
-    
-            var marker_123692f58305c33a5682041c368a8e56 = L.marker(
-                [-15.825675, -47.871708],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_a7f5c2bbbe31758706bd5db8b3dc9b3c = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_e61bdc4253834bed7c6851c83754fca7 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_8c14b929e689d9cc1600dec94e4a077d = $(`<div id="html_8c14b929e689d9cc1600dec94e4a077d" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">FAUSTO MANOEL</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 21<br>                 <b>Código Cliente:</b> 26525<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_e61bdc4253834bed7c6851c83754fca7.setContent(html_8c14b929e689d9cc1600dec94e4a077d);
-            
-        
-
-        marker_123692f58305c33a5682041c368a8e56.bindPopup(popup_e61bdc4253834bed7c6851c83754fca7)
-        ;
-
-        
-    
-    
-            marker_123692f58305c33a5682041c368a8e56.bindTooltip(
-                `<div>
-                     Rota 1 | FAUSTO MANOEL | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_123692f58305c33a5682041c368a8e56.setIcon(icon_a7f5c2bbbe31758706bd5db8b3dc9b3c);
-            
-    
-            var marker_bc3cc1f7f803056e3140a19b99428967 = L.marker(
-                [-15.786411, -47.833891],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_3570f0206b98b0d38784f207adc7a771 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_1bca21a7a9e17fa5311fa7bbf919678c = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_3602d8cd97595dfe136ef18e99fe33bc = $(`<div id="html_3602d8cd97595dfe136ef18e99fe33bc" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">VISTA DO LAGO BAR E</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 22<br>                 <b>Código Cliente:</b> 69199<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_1bca21a7a9e17fa5311fa7bbf919678c.setContent(html_3602d8cd97595dfe136ef18e99fe33bc);
-            
-        
-
-        marker_bc3cc1f7f803056e3140a19b99428967.bindPopup(popup_1bca21a7a9e17fa5311fa7bbf919678c)
-        ;
-
-        
-    
-    
-            marker_bc3cc1f7f803056e3140a19b99428967.bindTooltip(
-                `<div>
-                     Rota 1 | VISTA DO LAGO BAR E | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_bc3cc1f7f803056e3140a19b99428967.setIcon(icon_3570f0206b98b0d38784f207adc7a771);
-            
-    
-            var marker_5cef14dbbca94c454bf138fe00f55baa = L.marker(
-                [-15.641624, -47.79728],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_d80f685fe11ae3e90624801e02c791c3 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_5c86a8fec62b7cc79c09c3fb8f1ec881 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_9656e49419cfbbb359251b39ff10ebc2 = $(`<div id="html_9656e49419cfbbb359251b39ff10ebc2" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">P10</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 23<br>                 <b>Código Cliente:</b> 64154<br>                 <b>Peso:</b> 777.00 kg<br>                 <b>Caixas Corrigidas:</b> 30.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_5c86a8fec62b7cc79c09c3fb8f1ec881.setContent(html_9656e49419cfbbb359251b39ff10ebc2);
-            
-        
-
-        marker_5cef14dbbca94c454bf138fe00f55baa.bindPopup(popup_5c86a8fec62b7cc79c09c3fb8f1ec881)
-        ;
-
-        
-    
-    
-            marker_5cef14dbbca94c454bf138fe00f55baa.bindTooltip(
-                `<div>
-                     Rota 1 | P10 | 777 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_5cef14dbbca94c454bf138fe00f55baa.setIcon(icon_d80f685fe11ae3e90624801e02c791c3);
-            
-    
-            var marker_3c94a499c975ff4d57f43eae1ad1472a = L.marker(
-                [-15.621256, -47.65468],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_ff9229a09ffd446ea1c3ff0ee50b6be4 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_2fd35848ae840185659094ff814ce4a4 = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_ac341d9874a6d7a8e717d168a37d3b30 = $(`<div id="html_ac341d9874a6d7a8e717d168a37d3b30" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">FIGUEIREDO COZINHA E</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 24<br>                 <b>Código Cliente:</b> 67356<br>                 <b>Peso:</b> 259.00 kg<br>                 <b>Caixas Corrigidas:</b> 10.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_2fd35848ae840185659094ff814ce4a4.setContent(html_ac341d9874a6d7a8e717d168a37d3b30);
-            
-        
-
-        marker_3c94a499c975ff4d57f43eae1ad1472a.bindPopup(popup_2fd35848ae840185659094ff814ce4a4)
-        ;
-
-        
-    
-    
-            marker_3c94a499c975ff4d57f43eae1ad1472a.bindTooltip(
-                `<div>
-                     Rota 1 | FIGUEIREDO COZINHA E | 259 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_3c94a499c975ff4d57f43eae1ad1472a.setIcon(icon_ff9229a09ffd446ea1c3ff0ee50b6be4);
-            
-    
-            var marker_d3c9e746a62c0483689b5944d0d431d0 = L.marker(
-                [-15.601645, -47.656902],
-                {
-}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            var icon_ee95f5bfb54d51e3d0841b97e4066dca = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "blue",
-  "iconColor": "white",
-  "icon": "truck",
-  "prefix": "fa",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_ac3733b3e324932c398d7e0efc2a1b9f = L.popup({
-  "maxWidth": 350,
-});
-
-        
-            
-                var html_efb40ed6b37cad9561e2cc1f294d62f2 = $(`<div id="html_efb40ed6b37cad9561e2cc1f294d62f2" style="width: 100.0%; height: 100.0%;">             <div style="font-family:Arial; min-width:240px;">                 <h3 style="margin:0 0 8px 0;">Bar do Carlinhos</h3>                 <b>Rota:</b> 1<br>                 <b>Ordem sugerida:</b> 25<br>                 <b>Código Cliente:</b> 44433<br>                 <b>Peso:</b> 777.00 kg<br>                 <b>Caixas Corrigidas:</b> 30.00<br>                 <hr>                 <b>Placa principal:</b> NAQ8D19<br>                 <b>Reservas:</b> KAY6619<br>                 <b>Peso total da rota:</b> 7,770.00 kg<br>                 <b>Ocupação:</b> 89.2%<br>                 <b>Entregas na rota:</b> 25<br>                 <b>Raio aprox. da rota:</b> 33.7 km             </div>             </div>`)[0];
-                popup_ac3733b3e324932c398d7e0efc2a1b9f.setContent(html_efb40ed6b37cad9561e2cc1f294d62f2);
-            
-        
-
-        marker_d3c9e746a62c0483689b5944d0d431d0.bindPopup(popup_ac3733b3e324932c398d7e0efc2a1b9f)
-        ;
-
-        
-    
-    
-            marker_d3c9e746a62c0483689b5944d0d431d0.bindTooltip(
-                `<div>
-                     Rota 1 | Bar do Carlinhos | 777 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_d3c9e746a62c0483689b5944d0d431d0.setIcon(icon_ee95f5bfb54d51e3d0841b97e4066dca);
-            
-    
-            var poly_line_8881864f519f8128095c0b4b6a83a268 = L.polyline(
-                [[-16.002029850929986, -48.052193879663754], [-15.869308, -48.09004], [-15.829449, -48.05708], [-15.83546, -48.03756], [-15.837286, -48.02013], [-15.83784, -48.01332], [-15.845925, -47.966915], [-15.866807, -47.96312], [-15.834296, -47.921528], [-15.818284, -47.89601], [-15.815095, -47.89399], [-15.813278, -47.890564], [-15.800896, -47.882084], [-15.783753, -47.878433], [-15.783431, -47.878662], [-15.779764, -47.87561], [-15.777061, -47.878501], [-15.757762, -47.883636], [-15.795452, -47.91654], [-15.795342, -47.916706], [-15.798272, -47.920406], [-15.825675, -47.871708], [-15.786411, -47.833891], [-15.641624, -47.79728], [-15.621256, -47.65468], [-15.601645, -47.656902], [-16.002029850929986, -48.052193879663754]],
-                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "blue", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.75, "smoothFactor": 1.0, "stroke": true, "weight": 4}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            poly_line_8881864f519f8128095c0b4b6a83a268.bindTooltip(
-                `<div>
-                     Rota 1 - NAQ8D19
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-            var circle_ae1d9158a627af91347c1af8adcf828f = L.circle(
-                [-15.79005488, -47.903811839999996],
-                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 33727.25319459915, "stroke": true, "weight": 2}
-            ).addTo(feature_group_5d6707eafda4e3d4baa19b3d33c2d217);
-        
-    
-            circle_ae1d9158a627af91347c1af8adcf828f.bindTooltip(
-                `<div>
-                     Raio Rota 1: 33.7 km | 25 entregas | 7,770 kg
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-            feature_group_5d6707eafda4e3d4baa19b3d33c2d217.addTo(map_722645d1d2ea9a6052152f44e6a8cf25);
-        
-    
-            var layer_control_ae6a417979e92e829e5b5ed80520b09c_layers = {
-                base_layers : {
-                    "openstreetmap" : tile_layer_56522fc4ff7e1a863e34ac740fbabeff,
-                },
-                overlays :  {
-                    "Rota 1 | NAQ8D19 | 25 entregas | 7,770 kg | 89.2%" : feature_group_5d6707eafda4e3d4baa19b3d33c2d217,
-                },
-            };
-            let layer_control_ae6a417979e92e829e5b5ed80520b09c = L.control.layers(
-                layer_control_ae6a417979e92e829e5b5ed80520b09c_layers.base_layers,
-                layer_control_ae6a417979e92e829e5b5ed80520b09c_layers.overlays,
-                {
-  "position": "topright",
-  "collapsed": false,
-  "autoZIndex": true,
-}
-            ).addTo(map_722645d1d2ea9a6052152f44e6a8cf25);
-
-        
-</script>
 </html>
